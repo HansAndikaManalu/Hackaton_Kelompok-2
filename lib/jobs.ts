@@ -1,4 +1,4 @@
-import { Job } from "@/components/home/JobCard";
+import { Job } from "@/components/Home/JobCard";
 
 export const jobs: Job[] = [
   {
