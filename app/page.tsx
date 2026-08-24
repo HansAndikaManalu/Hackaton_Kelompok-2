@@ -1,4 +1,4 @@
-import Navbar from "@/components/Home/Navbar";
+import { Navbar } from "@/components/Navbar/Navbar";
 import HeroSearch from "@/components/Home/HeroSearch";
 import CategoryList from "@/components/Home/CategoryList";
 import JobSection from "@/components/Home/JobSection";
