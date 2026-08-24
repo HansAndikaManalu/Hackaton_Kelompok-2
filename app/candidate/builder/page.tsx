@@ -4,11 +4,52 @@ import { useState } from "react";
 import { DownloadCVButton } from "@/components/DownloadCVButton";
 import type { CVData } from "@/lib/cv";
 
+type Job = { id: string; title: string }
+
 export default function CandidateBuilderPage() {
-  const [rawText, setRawText] = useState("");
-  const [cvData, setCvData] = useState<CVData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [rawText, setRawText] = useState('')
+  const [cvData, setCvData] = useState<CVData | null>(null)
+  const [candidateId, setCandidateId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [selectedJobId, setSelectedJobId] = useState('')
+  const [applying, setApplying] = useState(false)
+  const [applicationId, setApplicationId] = useState<string | null>(null)
+
+  async function loadJobs() {
+    try {
+      const res = await fetch('/api/jobs')
+      const data = await res.json()
+      if (res.ok) setJobs(data.jobs)
+    } catch {
+      // silent, jobs list opsional
+    }
+  }
+
+  async function handleApply() {
+    if (!selectedJobId || !candidateId) return
+    setApplying(true)
+    setError('')
+    try {
+      const res = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidate_id: candidateId, job_id: selectedJobId }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Gagal apply, coba lagi.')
+        return
+      }
+      setApplicationId(data.application_id)
+    } catch {
+      setError('Terjadi kesalahan koneksi saat apply.')
+    } finally {
+      setApplying(false)
+    }
+  }
 
   async function handleGenerate() {
     if (!rawText.trim()) {
@@ -32,9 +73,11 @@ export default function CandidateBuilderPage() {
         return;
       }
 
-      setCvData(data.cv);
-    } catch {
-      setError("Terjadi kesalahan koneksi. Coba lagi.");
+      setCvData(data.cv)
+      setCandidateId(data.candidate_id)
+      loadJobs()
+    } catch (err) {
+      setError('Terjadi kesalahan koneksi. Coba lagi.')
     } finally {
       setLoading(false);
     }
@@ -141,6 +184,63 @@ export default function CandidateBuilderPage() {
           <p style={{ marginBottom: 20 }}>{cvData.skills.join(", ")}</p>
 
           <DownloadCVButton cv={cvData} />
+
+          <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #ddd' }}>
+            <h3 style={{ fontWeight: 700, color: '#1B2A4A', marginBottom: 8 }}>
+              Lamar Posisi
+            </h3>
+
+            {applicationId ? (
+              <p style={{ color: '#14B8A6', fontWeight: 600 }}>
+                Berhasil apply! Lanjut ke{' '}
+                <a href={`/assess/${applicationId}`} style={{ textDecoration: 'underline' }}>
+                  halaman verifikasi
+                </a>
+                .
+              </p>
+            ) : jobs.length === 0 ? (
+              <p style={{ color: '#777', fontSize: 14 }}>
+                Belum ada lowongan tersedia. Minta HR buat lowongan dulu di halaman{' '}
+                <code>/hr/new-job</code>.
+              </p>
+            ) : (
+              <>
+                <select
+                  value={selectedJobId}
+                  onChange={(e) => setSelectedJobId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: 10,
+                    borderRadius: 6,
+                    border: '1px solid #ccc',
+                    marginBottom: 12,
+                  }}
+                >
+                  <option value="">-- Pilih posisi --</option>
+                  {jobs.map((job) => (
+                    <option key={job.id} value={job.id}>
+                      {job.title}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleApply}
+                  disabled={!selectedJobId || applying}
+                  style={{
+                    backgroundColor: '#1B2A4A',
+                    color: 'white',
+                    fontWeight: 600,
+                    padding: '10px 24px',
+                    borderRadius: 6,
+                    border: 'none',
+                    cursor: applying ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {applying ? 'Mengirim lamaran...' : 'Save & Apply to Open Roles'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </main>
