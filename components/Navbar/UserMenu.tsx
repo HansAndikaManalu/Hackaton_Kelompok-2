@@ -141,7 +141,7 @@ export default function UserMenu({
                 />
 
                 <MenuItem
-                  href="/hr/jobs"
+                  href="/hr/new-job"
                   icon={<FileText size={17} />}
                   label="Kelola Lowongan"
                 />
