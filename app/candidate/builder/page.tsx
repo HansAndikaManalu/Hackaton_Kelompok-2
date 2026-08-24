@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DownloadCVButton } from "@/components/DownloadCVButton";
+import { DownloadCVButton } from "@/components/UI/DownloadCVButton";
 import type { CVData } from "@/lib/cv";
 
 export default function CandidateBuilderPage() {
