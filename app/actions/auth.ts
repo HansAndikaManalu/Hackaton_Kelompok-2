@@ -1,6 +1,6 @@
 'use server'
 
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
@@ -17,7 +17,11 @@ interface SignInPayload {
 
 export async function handleSignUp({ email, password, role }: SignUpPayload) {
   try {
-    const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
+    // 1. Inisialisasi Supabase Client
+    const supabase = await createClient()
+
+    // 2. Lakukan Sign Up via Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -25,8 +29,8 @@ export async function handleSignUp({ email, password, role }: SignUpPayload) {
     if (authError) throw new Error(authError.message)
     if (!authData.user) throw new Error('User gagal dibuat')
 
-    // Simpan role ke tabel profiles
-    const { error: profileError } = await supabaseAdmin
+    // 3. Simpan role ke tabel profiles
+    const { error: profileError } = await supabase
       .from('profiles')
       .insert({
         id: authData.user.id,
@@ -37,15 +41,20 @@ export async function handleSignUp({ email, password, role }: SignUpPayload) {
     if (profileError) throw new Error(profileError.message)
 
     return { success: true }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan'
+    return { success: false, error: message }
   }
 }
 
 export async function handleSignIn({ email, password }: SignInPayload) {
   try {
+    // 1. Inisialisasi Supabase Client
+    const supabase = await createClient()
+
+    // 2. Lakukan Login
     const { data: authData, error: authError } =
-      await supabaseAdmin.auth.signInWithPassword({
+      await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -53,8 +62,8 @@ export async function handleSignIn({ email, password }: SignInPayload) {
     if (authError) throw new Error(authError.message)
     if (!authData.user) throw new Error('User tidak ditemukan')
 
-    // Ambil data profile
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // 3. Ambil data profile untuk tahu role-nya
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', authData.user.id)
@@ -64,7 +73,7 @@ export async function handleSignIn({ email, password }: SignInPayload) {
       throw new Error('Data profil user tidak ditemukan')
     }
 
-    // Set cookie sederhana untuk menyimpan role/session di browser
+    // 4. Set cookie tambahan jika diperlukan
     const cookieStore = await cookies()
     cookieStore.set('user_id', authData.user.id, { httpOnly: true, path: '/' })
     cookieStore.set('user_role', profile.role, { httpOnly: true, path: '/' })
@@ -74,15 +83,22 @@ export async function handleSignIn({ email, password }: SignInPayload) {
       role: profile.role as 'hr' | 'candidate',
       userId: authData.user.id,
     }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan'
+    return { success: false, error: message }
   }
 }
 
 export async function handleSignOut() {
+  const supabase = await createClient()
+  
+  // Sign out dari Supabase Auth
+  await supabase.auth.signOut()
+
+  // Hapus cookie manual
   const cookieStore = await cookies()
   cookieStore.delete('user_id')
   cookieStore.delete('user_role')
-  
+
   redirect('/login')
 }
