@@ -1,29 +1,18 @@
-'use client'
+"use client";
 
-import dynamic from 'next/dynamic'
-import { CVDocument } from './CVDocument'
+import dynamic from "next/dynamic";
+import { CVDocument } from "./CVDocument";
+import type { CVData } from "@/lib/cv";
 
 // PDFDownloadLink harus di-load dynamic (client-only), karena
 // @react-pdf/renderer tidak jalan di server rendering Next.js
 const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
-  { ssr: false, loading: () => <button disabled>Menyiapkan PDF...</button> }
-)
-
-type CVData = {
-  full_name: string
-  summary: string
-  experience: {
-    role: string
-    company: string
-    points: string[]
-  }[]
-  education: string[]
-  skills: string[]
-}
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false, loading: () => <button disabled>Menyiapkan PDF...</button> },
+);
 
 export function DownloadCVButton({ cv }: { cv: CVData }) {
-  const fileName = `CV-${cv.full_name.replace(/\s+/g, '-')}.pdf`
+  const fileName = `CV-${cv.full_name.replace(/\s+/g, "-")}.pdf`;
 
   return (
     <PDFDownloadLink document={<CVDocument cv={cv} />} fileName={fileName}>
@@ -31,18 +20,18 @@ export function DownloadCVButton({ cv }: { cv: CVData }) {
         <button
           disabled={loading}
           style={{
-            backgroundColor: '#F59E0B',
-            color: '#1B2A4A',
+            backgroundColor: "#F59E0B",
+            color: "#1B2A4A",
             fontWeight: 600,
-            padding: '10px 20px',
+            padding: "10px 20px",
             borderRadius: 6,
-            border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            border: "none",
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? 'Menyiapkan PDF...' : 'Export CV ke PDF'}
+          {loading ? "Menyiapkan PDF..." : "Export CV ke PDF"}
         </button>
       )}
     </PDFDownloadLink>
-  )
+  );
 }

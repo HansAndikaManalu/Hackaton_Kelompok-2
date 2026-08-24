@@ -32,7 +32,7 @@ export default function NewJobPage() {
       }
 
       setScenarios(data.scenarios)
-    } catch (err) {
+    } catch {
       setError('Terjadi kesalahan koneksi. Coba lagi.')
     } finally {
       setLoading(false)

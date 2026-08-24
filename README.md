@@ -1,6 +1,6 @@
 # TalentPulse
 
-TalentPulse adalah aplikasi berbasis Next.js untuk mendukung pengembangan fitur talent dan lowongan kerja. Repository ini saat ini berisi fondasi aplikasi, koneksi Supabase, serta endpoint pengujian integrasi Google Gemini.
+TalentPulse adalah aplikasi berbasis Next.js untuk membantu proses rekrutmen dan pembuatan CV. Aplikasi ini menyediakan generator CV ramah ATS untuk kandidat, generator skenario verifikasi untuk HR, koneksi Supabase, serta integrasi Google Gemini.
 
 ## Teknologi
 
@@ -10,6 +10,7 @@ TalentPulse adalah aplikasi berbasis Next.js untuk mendukung pengembangan fitur 
 - Supabase untuk database
 - Vercel AI SDK dan Google AI SDK untuk Gemini
 - Zod untuk validasi data
+- `@react-pdf/renderer` untuk export CV ke PDF
 
 ## Prasyarat
 
@@ -81,19 +82,45 @@ curl -X POST http://localhost:3000/api/test-ai \
 
 Endpoint ini menggunakan model `gemini-3.6-flash` dan mengembalikan hasil pada field `response`.
 
+### `POST /api/candidate/builder`
+
+Mengubah pengalaman kerja atau pendidikan mentah menjadi CV terstruktur menggunakan Gemini. Request menggunakan field `rawText` dan response berhasil mengembalikan object `cv` berisi nama, ringkasan, pengalaman, pendidikan, dan skills.
+
+### `POST /api/hr/new-job`
+
+Membuat tiga pertanyaan skenario kasus berdasarkan `jobTitle` dan `jdText` untuk membantu HR memverifikasi kemampuan kandidat.
+
+Route API kandidat dan HR hanya tersedia pada path yang tercantum di atas. Route kandidat duplikat yang sebelumnya identik dengan `/api/candidate/builder` telah dihapus.
+
+## Halaman Aplikasi
+
+- `/candidate/builder` - Kandidat memasukkan pengalaman mentah, menghasilkan CV dengan AI, lalu mengunduhnya sebagai PDF.
+- `/hr/new-job` - HR memasukkan judul posisi dan Job Description untuk menghasilkan pertanyaan verifikasi.
+- `/` - Halaman utama aplikasi.
+
 ## Struktur Folder
 
 ```text
 .
 ├── app/
-│   ├── actions.ts              # Server action untuk pengujian Gemini
+│   ├── actions.ts              # Server action pengujian Gemini
 │   ├── globals.css             # Global styles dan konfigurasi Tailwind
 │   ├── layout.tsx              # Root layout dan metadata aplikasi
 │   ├── page.tsx                # Halaman utama
+│   ├── candidate/
+│   │   └── builder/page.tsx    # UI generator CV kandidat
+│   ├── hr/
+│   │   └── new-job/page.tsx    # UI generator skenario HR
 │   └── api/
-│       ├── health/route.ts     # Health check Supabase
-│       └── test-ai/route.ts    # Endpoint pengujian Gemini
+│       ├── candidate/builder/route.ts # API generator CV
+│       ├── health/route.ts            # Health check Supabase
+│       ├── hr/new-job/route.ts        # API skenario verifikasi HR
+│       └── test-ai/route.ts           # Endpoint pengujian Gemini
+├── components/
+│   ├── CVDocument.tsx           # Template dokumen CV PDF
+│   └── DownloadCVButton.tsx     # Tombol export CV ke PDF
 ├── lib/
+│   ├── cv.ts                   # Schema dan type CV terpusat
 │   └── supabase.ts             # Supabase admin client
 ├── public/                     # Asset statis
 ├── next.config.ts              # Konfigurasi Next.js
@@ -105,7 +132,7 @@ Endpoint ini menggunakan model `gemini-3.6-flash` dan mengembalikan hasil pada f
 
 ## Catatan Pengembangan
 
-Halaman utama saat ini masih menggunakan halaman starter Next.js. Pengembangan UI dan fitur utama TalentPulse dapat dilanjutkan di `app/page.tsx` dengan memanfaatkan client Supabase di `lib/supabase.ts` dan API route yang sudah tersedia.
+Schema dan type CV disimpan terpusat di `lib/cv.ts` agar route API, halaman builder, dan komponen PDF tidak memiliki definisi data yang berulang. Komponen reusable berada di `components/`, sedangkan route dan halaman dikelompokkan berdasarkan fitur di dalam `app/`.
 
 ## Referensi
 

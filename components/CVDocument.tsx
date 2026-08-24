@@ -1,27 +1,16 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
-
-type CVData = {
-  full_name: string
-  summary: string
-  experience: {
-    role: string
-    company: string
-    points: string[]
-  }[]
-  education: string[]
-  skills: string[]
-}
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import type { CVData } from "@/lib/cv";
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
-    color: '#1B2A4A',
+    fontFamily: "Helvetica",
+    color: "#1B2A4A",
   },
   name: {
     fontSize: 20,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
     marginBottom: 4,
   },
   summary: {
@@ -31,11 +20,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
     marginTop: 12,
     marginBottom: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#14B8A6',
+    borderBottomColor: "#14B8A6",
     paddingBottom: 2,
   },
   expBlock: {
@@ -43,12 +32,12 @@ const styles = StyleSheet.create({
   },
   role: {
     fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
   },
   company: {
     fontSize: 10,
     marginBottom: 2,
-    color: '#555',
+    color: "#555",
   },
   point: {
     fontSize: 10,
@@ -61,19 +50,19 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   skillsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   skillBadge: {
     fontSize: 9,
-    backgroundColor: '#F4F5F7',
+    backgroundColor: "#F4F5F7",
     paddingHorizontal: 6,
     paddingVertical: 3,
     marginRight: 4,
     marginBottom: 4,
     borderRadius: 3,
   },
-})
+});
 
 export function CVDocument({ cv }: { cv: CVData }) {
   return (
@@ -112,5 +101,5 @@ export function CVDocument({ cv }: { cv: CVData }) {
         </View>
       </Page>
     </Document>
-  )
+  );
 }
