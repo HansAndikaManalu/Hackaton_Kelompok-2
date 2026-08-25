@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createClient, supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   req: Request,
@@ -9,8 +9,18 @@ export async function GET(
     const { jobId } = await params
     const supabase = await createClient()
 
-    // 1. Ambil detail job
-    const { data: job, error: jobError } = await supabase
+    // 1. Verifikasi auth HR
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // 2. Ambil detail job
+    const { data: job, error: jobError } = await supabaseAdmin
       .from('job_vacancies')
       .select('id, title, jd_text')
       .eq('id', jobId)
@@ -20,19 +30,30 @@ export async function GET(
       return NextResponse.json({ error: 'Job tidak ditemukan' }, { status: 404 })
     }
 
-    // 2. Ambil pelamar (applications) beserta profilnya
-    const { data: applications, error: appError } = await supabase
+    // 3. Ambil pelamar beserta profil kandidat
+    const { data: applications, error: appError } = await supabaseAdmin
       .from('applications')
-      .select('id, match_score, transcript, status, candidate_profiles(full_name, cv_json)')
+      .select(`
+        id,
+        match_score,
+        transcript,
+        status,
+        candidate_profiles (
+          full_name,
+          cv_json
+        )
+      `)
       .eq('job_id', jobId)
       .order('match_score', { ascending: false, nullsFirst: false })
 
     if (appError) {
+      console.error('Fetch Applications Error:', appError)
       return NextResponse.json({ error: appError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, job, applications })
+    return NextResponse.json({ success: true, job, applications: applications || [] })
   } catch (error: unknown) {
+    console.error('API Error:', error)
     const message = error instanceof Error ? error.message : 'Internal Server Error'
     return NextResponse.json({ error: message }, { status: 500 })
   }
