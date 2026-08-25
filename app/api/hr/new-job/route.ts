@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     // 4. Generate Skenario dari AI
     const { object } = await generateObject({
-      model: google('gemini-1.5-flash'),
+      model: google('gemini-3.6-flash'),
       schema: scenarioSchema,
       system: SYSTEM_PROMPT,
       prompt: `Job Title: ${jobTitle || '(tidak disebutkan)'}\n\nJob Description:\n${jdText}\n\nBuat 3 pertanyaan skenario kasus untuk memverifikasi kandidat yang melamar posisi ini.`,
