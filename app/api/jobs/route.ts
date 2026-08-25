@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
       .from('job_vacancies')
       .select('id, title, created_at')
       .order('created_at', { ascending: false })

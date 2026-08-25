@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 export async function GET(
   req: Request,
@@ -7,8 +7,10 @@ export async function GET(
 ) {
   try {
     const { jobId } = await params
+    const supabase = await createClient()
 
-    const { data: job, error: jobError } = await supabaseAdmin
+    // 1. Ambil detail job
+    const { data: job, error: jobError } = await supabase
       .from('job_vacancies')
       .select('id, title, jd_text')
       .eq('id', jobId)
@@ -18,7 +20,8 @@ export async function GET(
       return NextResponse.json({ error: 'Job tidak ditemukan' }, { status: 404 })
     }
 
-    const { data: applications, error: appError } = await supabaseAdmin
+    // 2. Ambil pelamar (applications) beserta profilnya
+    const { data: applications, error: appError } = await supabase
       .from('applications')
       .select('id, match_score, transcript, status, candidate_profiles(full_name, cv_json)')
       .eq('job_id', jobId)
