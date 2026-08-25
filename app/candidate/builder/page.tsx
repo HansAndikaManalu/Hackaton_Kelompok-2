@@ -1,4 +1,3 @@
-// src/app/candidate/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -27,7 +26,10 @@ export default function CandidateBuilderPage() {
     try {
       const res = await fetch("/api/jobs");
       const data = await res.json();
-      if (res.ok) setJobs(data.jobs);
+
+      if (res.ok) {
+        setJobs(data.jobs);
+      }
     } catch {
       // silent, jobs list opsional
     }
@@ -35,8 +37,10 @@ export default function CandidateBuilderPage() {
 
   async function handleApply() {
     if (!selectedJobId || !candidateId) return;
+
     setApplying(true);
     setError("");
+
     try {
       const res = await fetch("/api/apply", {
         method: "POST",
@@ -46,11 +50,14 @@ export default function CandidateBuilderPage() {
           job_id: selectedJobId,
         }),
       });
+
       const data = await res.json();
+
       if (!res.ok) {
         setError(data.error || "Gagal apply, coba lagi.");
         return;
       }
+
       setApplicationId(data.application_id);
     } catch {
       setError("Terjadi kesalahan koneksi saat apply.");
@@ -61,7 +68,9 @@ export default function CandidateBuilderPage() {
 
   async function handleGenerate() {
     if (!rawText.trim()) {
-      setError("Isi pengalaman, pendidikan, atau background kamu terlebih dahulu.");
+      setError(
+        "Isi pengalaman, pendidikan, atau background kamu terlebih dahulu."
+      );
       return;
     }
 
@@ -84,9 +93,11 @@ export default function CandidateBuilderPage() {
       }
 
       setCvData(data.cv);
+
       if (data.candidate_id) {
         setCandidateId(data.candidate_id);
       }
+
       loadJobs();
     } catch {
       setError("Terjadi kesalahan koneksi. Silakan coba lagi.");
@@ -118,12 +129,12 @@ export default function CandidateBuilderPage() {
           <div className="mt-8 space-y-6">
             <CVPreview cvData={cvData} />
 
-            {/* Section Aksi & Apply Pekerjaan */}
             <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <h3 className="text-lg font-bold text-slate-800">
                   Langkah Selanjutnya
                 </h3>
+
                 <DownloadCVButton cv={cvData} />
               </div>
 
@@ -146,7 +157,11 @@ export default function CandidateBuilderPage() {
                 ) : jobs.length === 0 ? (
                   <p className="text-sm text-slate-500">
                     Belum ada lowongan tersedia. Minta HR buat lowongan dulu di
-                    halaman <code className="rounded bg-slate-100 px-1 py-0.5">/hr/new-job</code>.
+                    halaman{" "}
+                    <code className="rounded bg-slate-100 px-1 py-0.5">
+                      /hr/new-job
+                    </code>
+                    .
                   </p>
                 ) : (
                   <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -156,6 +171,7 @@ export default function CandidateBuilderPage() {
                       className="w-full rounded-md border border-slate-300 p-2.5 text-sm focus:border-amber-500 focus:outline-none sm:w-80"
                     >
                       <option value="">-- Pilih posisi --</option>
+
                       {jobs.map((job) => (
                         <option key={job.id} value={job.id}>
                           {job.title}
@@ -168,7 +184,9 @@ export default function CandidateBuilderPage() {
                       disabled={!selectedJobId || applying}
                       className="rounded-md bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {applying ? "Mengirim lamaran..." : "Save & Apply to Open Roles"}
+                      {applying
+                        ? "Mengirim lamaran..."
+                        : "Save & Apply to Open Roles"}
                     </button>
                   </div>
                 )}
