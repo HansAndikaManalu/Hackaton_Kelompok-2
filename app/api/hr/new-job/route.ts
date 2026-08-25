@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
+import { supabaseAdmin } from '@/lib/supabase'
 
 const scenarioSchema = z.object({
   scenarios: z.array(z.string()).length(3),
@@ -35,7 +36,26 @@ export async function POST(req: Request) {
       prompt: `Job Title: ${jobTitle || '(tidak disebutkan)'}\n\nJob Description:\n${jdText}\n\nBuat 3 pertanyaan skenario kasus untuk memverifikasi kandidat yang melamar posisi ini.`,
     })
 
-    return NextResponse.json({ success: true, scenarios: object.scenarios })
+    // simpan job + scenarios ke tabel job_vacancies
+    const { data: saved, error: dbError } = await supabaseAdmin
+      .from('job_vacancies')
+      .insert({
+        title: jobTitle || 'Posisi Tanpa Judul',
+        jd_text: jdText,
+        scenarios: object.scenarios,
+      })
+      .select('id')
+      .single()
+
+    if (dbError) {
+      return NextResponse.json({ error: dbError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      scenarios: object.scenarios,
+      job_id: saved.id,
+    })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error'
     return NextResponse.json({ error: message }, { status: 500 })
