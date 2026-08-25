@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-
-    const { data, error } = await supabase
+    const { data: jobs, error } = await supabaseAdmin
       .from('job_vacancies')
-      .select('id, title, created_at')
+      .select('id, title, jd_text, created_at')
       .order('created_at', { ascending: false })
 
     if (error) {
+      console.error('Fetch Jobs Error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, jobs: data })
+    return NextResponse.json({ success: true, jobs: jobs || [] })
   } catch (error: unknown) {
+    console.error('API Jobs Internal Error:', error)
     const message = error instanceof Error ? error.message : 'Internal Server Error'
     return NextResponse.json({ error: message }, { status: 500 })
   }
