@@ -1,3 +1,4 @@
+// ===== FILE INI: app/assess/[applicationId]/page.tsx (HALAMAN JAWAB PERTANYAAN KANDIDAT) =====
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -35,6 +36,18 @@ export default function AssessPage() {
           return
         }
         setApplication(data.application)
+
+        // pulihkan progress jawaban kalau sebelumnya sempat terputus
+        const saved = localStorage.getItem(`assess-progress-${applicationId}`)
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved) as { answers: string[]; step: number }
+            setAnswers(parsed.answers)
+            setCurrentStep(parsed.step)
+          } catch {
+            // data corrupt, abaikan saja
+          }
+        }
       } catch {
         setError('Terjadi kesalahan koneksi.')
       } finally {
@@ -54,7 +67,13 @@ export default function AssessPage() {
     const scenarios = application?.job_vacancies?.scenarios ?? []
 
     if (currentStep + 1 < scenarios.length) {
-      setCurrentStep(currentStep + 1)
+      const nextStep = currentStep + 1
+      setCurrentStep(nextStep)
+      // simpan progress sementara, jaga-jaga koneksi putus/refresh
+      localStorage.setItem(
+        `assess-progress-${applicationId}`,
+        JSON.stringify({ answers: updatedAnswers, step: nextStep })
+      )
     } else {
       // sudah jawab semua pertanyaan, submit buat dievaluasi
       setSubmitting(true)
@@ -71,6 +90,8 @@ export default function AssessPage() {
           return
         }
         setResult({ match_score: data.match_score, pitch_summary: data.pitch_summary })
+        // selesai, progress sementara nggak diperlukan lagi
+        localStorage.removeItem(`assess-progress-${applicationId}`)
       } catch {
         setError('Terjadi kesalahan koneksi saat submit jawaban.')
       } finally {
@@ -112,6 +133,11 @@ export default function AssessPage() {
             backgroundColor: '#F4F5F7',
           }}
         >
+          {answers.length > 0 && (
+            <p style={{ fontSize: 12, color: '#F59E0B', marginBottom: 8 }}>
+              Progress sebelumnya dipulihkan — lanjut dari pertanyaan {currentStep + 1}.
+            </p>
+          )}
           <p style={{ fontSize: 12, color: '#14B8A6', fontWeight: 600, marginBottom: 8 }}>
             Pertanyaan {currentStep + 1} dari {scenarios.length}
           </p>

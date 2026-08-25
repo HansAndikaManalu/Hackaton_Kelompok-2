@@ -1,3 +1,4 @@
+// ===== FILE INI: app/hr/dashboard/[jobId]/page.tsx (HALAMAN TABEL RANKING KANDIDAT UNTUK HR) =====
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -28,6 +29,28 @@ function scoreColor(score: number | null) {
   if (score >= 70) return '#14B8A6' // teal - tinggi
   if (score >= 40) return '#F59E0B' // amber - sedang
   return '#999' // grey - rendah
+}
+
+function exportShortlistCSV(jobTitle: string, applications: CandidateApp[]) {
+  const header = ['Nama', 'Match Score', 'Status', 'Ringkasan AI']
+  const rows = applications.map((app) => [
+    app.candidate_profiles?.full_name ?? '(tanpa nama)',
+    app.match_score !== null ? String(app.match_score) : '-',
+    app.status,
+    (app.transcript?.pitch_summary ?? '').replace(/"/g, '""'),
+  ])
+
+  const csvContent = [header, ...rows]
+    .map((row) => row.map((cell) => `"${cell}"`).join(','))
+    .join('\n')
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `Shortlist-${jobTitle.replace(/\s+/g, '-')}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 export default function HrDashboardPage() {
@@ -71,12 +94,32 @@ export default function HrDashboardPage() {
           padding: 20,
           borderRadius: 8,
           marginBottom: 24,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        <h1 style={{ fontSize: 22, fontWeight: 700 }}>{data.job.title}</h1>
-        <p style={{ opacity: 0.8, fontSize: 14, marginTop: 4 }}>
-          {data.applications.length} kandidat melamar
-        </p>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 700 }}>{data.job.title}</h1>
+          <p style={{ opacity: 0.8, fontSize: 14, marginTop: 4 }}>
+            {data.applications.length} kandidat melamar
+          </p>
+        </div>
+        <button
+          onClick={() => exportShortlistCSV(data.job.title, data.applications)}
+          disabled={data.applications.length === 0}
+          style={{
+            backgroundColor: '#F59E0B',
+            color: '#1B2A4A',
+            fontWeight: 600,
+            padding: '10px 20px',
+            borderRadius: 6,
+            border: 'none',
+            cursor: data.applications.length === 0 ? 'not-allowed' : 'pointer',
+          }}
+        >
+          Export Shortlist
+        </button>
       </div>
 
       {data.applications.length === 0 ? (
