@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase' 
+import { createClient } from '@/lib/supabase'
+
 const scenarioSchema = z.object({
   scenarios: z.array(z.string()).length(3),
 })
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
       prompt: `Job Title: ${jobTitle || '(tidak disebutkan)'}\n\nJob Description:\n${jdText}\n\nBuat 3 pertanyaan skenario kasus untuk memverifikasi kandidat yang melamar posisi ini.`,
     })
 
-    // 5. Simpan ke Database
+    // 5. Simpan ke Database (Menyertakan hr_id)
     const { data: newJob, error: dbError } = await supabase
       .from('job_vacancies')
       .insert({
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       job: newJob,
+      job_id: newJob.id,
       scenarios: object.scenarios,
     })
   } catch (error: unknown) {
