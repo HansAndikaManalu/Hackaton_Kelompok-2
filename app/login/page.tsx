@@ -27,9 +27,9 @@ export default function LoginPage() {
 
     if (res.success) {
       if (res.role === "hr") {
-        router.push("/");
+        router.push("/hr/dashboard");
       } else {
-        router.push("/");
+        router.push("/pelamar");
       }
     } else {
       setError(res.error || "Gagal masuk");

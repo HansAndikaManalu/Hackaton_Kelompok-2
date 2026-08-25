@@ -16,21 +16,20 @@ import { handleSignOut } from "@/app/actions/auth";
 type UserMenuProps = {
   userRole: "hr" | "candidate";
   userName: string;
+  userEmail?: string;
 };
 
 export default function UserMenu({
   userRole,
   userName,
+  userEmail,
 }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     };
@@ -38,18 +37,13 @@ export default function UserMenu({
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const isHR = userRole === "hr";
 
-  const roleLabel = isHR
-    ? "HR / Recruiter"
-    : "Pencari Kerja";
+  const roleLabel = isHR ? "HR / Recruiter" : "Pencari Kerja";
 
   const initials = userName
     .split(" ")
@@ -59,19 +53,15 @@ export default function UserMenu({
     .toUpperCase();
 
   return (
-    <div
-      ref={menuRef}
-      className="relative"
-    >
-
+    <div ref={menuRef} className="relative">
       {/* ================= PROFILE BUTTON ================= */}
 
       <button
         type="button"
+        suppressHydrationWarning
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-slate-50"
       >
-
         {/* Avatar */}
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
           {initials}
@@ -79,15 +69,11 @@ export default function UserMenu({
 
         {/* Name + Role */}
         <div className="hidden text-left sm:block">
-
           <p className="max-w-[130px] truncate text-sm font-semibold text-slate-800">
             {userName}
           </p>
 
-          <p className="text-[11px] text-slate-500">
-            {roleLabel}
-          </p>
-
+          <p className="text-[11px] text-slate-500">{roleLabel}</p>
         </div>
 
         <ChevronDown
@@ -96,42 +82,37 @@ export default function UserMenu({
             open ? "rotate-180" : ""
           }`}
         />
-
       </button>
 
       {/* ================= DROPDOWN ================= */}
 
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-
           {/* User Header */}
           <div className="border-b border-slate-100 px-4 py-4">
-
             <div className="flex items-center gap-3">
-
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
                 {initials}
               </div>
 
               <div className="min-w-0">
-
                 <p className="truncate text-sm font-semibold text-slate-900">
                   {userName}
                 </p>
 
-                <p className="text-xs text-slate-500">
-                  {roleLabel}
-                </p>
+                <p className="text-xs text-slate-500">{roleLabel}</p>
 
+                {userEmail && (
+                  <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                    {userEmail}
+                  </p>
+                )}
               </div>
-
             </div>
-
           </div>
 
           {/* Menu */}
           <div className="p-2">
-
             {isHR ? (
               <>
                 <MenuItem
@@ -207,16 +188,12 @@ export default function UserMenu({
                 <span>Keluar</span>
               </button>
             </form>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 }
-
 
 /* =========================================================
    MENU ITEM

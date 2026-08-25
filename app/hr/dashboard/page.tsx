@@ -1,63 +1,60 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface JobVacancy {
-  id: string
-  title: string
-  created_at: string
-  total_applicants: number
+  id: string;
+  title: string;
+  created_at: string;
+  total_applicants: number;
 }
 
 export default function HRDashboardPage() {
-  const router = useRouter()  
-
-  const [jobs, setJobs] = useState<JobVacancy[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [jobs, setJobs] = useState<JobVacancy[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchJobs() {
       try {
-        const res = await fetch('/api/hr/dashboard/jobs')
+        const res = await fetch("/api/hr/dashboard/jobs");
 
-        const contentType = res.headers.get('content-type')
-        if (!contentType || !contentType.includes('application/json')) {
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
           throw new Error(
-            `Server mengembalikan respon non-JSON (Status: ${res.status}). Pastikan Anda sudah login.`
-          )
+            `Server mengembalikan respon non-JSON (Status: ${res.status}). Pastikan Anda sudah login.`,
+          );
         }
 
-        const data = await res.json()
+        const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || 'Gagal mengambil data lowongan')
+          throw new Error(data.error || "Gagal mengambil data lowongan");
         }
 
-        setJobs(data.jobs)
+        setJobs(data.jobs);
       } catch (err: unknown) {
         const message =
-          err instanceof Error ? err.message : 'Terjadi kesalahan'
-        setError(message)
+          err instanceof Error ? err.message : "Terjadi kesalahan";
+        setError(message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchJobs()
-  }, [])
+    fetchJobs();
+  }, []);
 
   const totalApplicants = jobs.reduce(
     (acc, job) => acc + job.total_applicants,
-    0
-  )
+    0,
+  );
 
   if (loading) {
     return (
-      <main className="min-h-[calc(100vh-64px)] bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="py-2">
+        <div className="mx-auto w-full py-8">
           <div className="animate-pulse space-y-8">
             <div className="space-y-3">
               <div className="h-8 w-64 rounded-lg bg-slate-200" />
@@ -72,14 +69,14 @@ export default function HRDashboardPage() {
             <div className="h-96 rounded-2xl bg-white" />
           </div>
         </div>
-      </main>
-    )
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <main className="min-h-[calc(100vh-64px)] bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="py-2">
+        <div className="mx-auto w-full py-8">
           <div className="rounded-2xl border border-red-100 bg-white p-6">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
@@ -95,55 +92,23 @@ export default function HRDashboardPage() {
             </div>
           </div>
         </div>
-      </main>
-    )
+      </div>
+    );
   }
 
   return (
-    <main className="min-h-[calc(100vh-64px)] bg-slate-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-         {/* BACK BUTTON */}
-        <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-700"
-        >
-        <svg
-            className="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-        >
-            <path
-            d="M19 12H5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            />
-            <path
-            d="M12 19l-7-7 7-7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            />
-        </svg>
-
-        Kembali
-        </button>
-
+    <div className="py-2">
+      <div className="mx-auto w-full py-8">
         {/* ========================================
             HEADER
         ======================================== */}
         <section className="mb-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-
             <div>
               <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
                 <span>Dashboard</span>
                 <span className="text-slate-300">/</span>
-                <span className="font-medium text-slate-700">
-                  Rekrutmen
-                </span>
+                <span className="font-medium text-slate-700">Rekrutmen</span>
               </div>
 
               <h1 className="text-3xl font-bold tracking-tight text-slate-950">
@@ -170,7 +135,6 @@ export default function HRDashboardPage() {
             STATISTICS
         ======================================== */}
         <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
           {/* Active Jobs */}
           <div className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-blue-200 hover:shadow-sm">
             <div className="flex items-start justify-between">
@@ -277,7 +241,6 @@ export default function HRDashboardPage() {
             JOB LIST
         ======================================== */}
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-
           {/* Section Header */}
           <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -320,8 +283,8 @@ export default function HRDashboardPage() {
               </h3>
 
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Buat lowongan pertama untuk mulai menerima dan
-                menyeleksi kandidat.
+                Buat lowongan pertama untuk mulai menerima dan menyeleksi
+                kandidat.
               </p>
 
               <Link
@@ -339,17 +302,15 @@ export default function HRDashboardPage() {
                   className="group px-5 py-5 transition hover:bg-slate-50 sm:px-6"
                 >
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
                     {/* Job Information */}
                     <div className="flex min-w-0 items-start gap-4">
-
                       {/* Company / Job Icon */}
                       <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold text-blue-700 sm:flex">
                         {job.title
-                          .split(' ')
+                          .split(" ")
                           .slice(0, 2)
                           .map((word) => word[0])
-                          .join('')
+                          .join("")
                           .toUpperCase()}
                       </div>
 
@@ -365,14 +326,14 @@ export default function HRDashboardPage() {
                         </div>
 
                         <p className="mt-1 text-xs text-slate-400">
-                          Dibuat pada{' '}
+                          Dibuat pada{" "}
                           {new Date(job.created_at).toLocaleDateString(
-                            'id-ID',
+                            "id-ID",
                             {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                            }
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            },
                           )}
                         </p>
 
@@ -388,7 +349,6 @@ export default function HRDashboardPage() {
                               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                               <circle cx="9" cy="7" r="4" />
                             </svg>
-
                             {job.total_applicants} Pelamar
                           </span>
 
@@ -403,7 +363,6 @@ export default function HRDashboardPage() {
 
                     {/* Actions */}
                     <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-4 lg:border-0 lg:pt-0">
-
                       <div className="text-left lg:text-right">
                         <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                           Kandidat
@@ -435,15 +394,11 @@ export default function HRDashboardPage() {
             BOTTOM INFO
         ======================================== */}
         <div className="mt-6 flex flex-col gap-2 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            Kelola proses rekrutmen dengan lebih mudah.
-          </p>
+          <p>Kelola proses rekrutmen dengan lebih mudah.</p>
 
-          <p>
-            ResumeForge
-          </p>
+          <p>ResumeForge</p>
         </div>
       </div>
-    </main>
-  )
+    </div>
+  );
 }
