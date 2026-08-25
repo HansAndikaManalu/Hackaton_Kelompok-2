@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client'
 
 import { useState } from 'react'
@@ -16,6 +17,17 @@ type CVData = {
 }
 
 type Job = { id: string; title: string }
+=======
+// src/app/candidate/page.tsx
+"use client";
+
+import { useState } from "react";
+import type { CVData } from "@/lib/cv";
+import { CandidateHeader } from "@/components/CandidatedBuilder/Header";
+import { CandidateForm } from "@/components/CandidatedBuilder/Form";
+import { CandidateSidebar } from "@/components/CandidatedBuilder/Sidebar";
+import { CVPreview } from "@/components/CandidatedBuilder/Preview";
+>>>>>>> origin/develop
 
 export default function CandidateBuilderPage() {
   const [rawText, setRawText] = useState('')
@@ -64,18 +76,31 @@ export default function CandidateBuilderPage() {
 
   async function handleGenerate() {
     if (!rawText.trim()) {
+<<<<<<< HEAD
       setError('Isi dulu pengalaman kerja/pendidikan kamu.')
       return
     }
     setError('')
     setLoading(true)
     setCvData(null)
+=======
+      setError(
+        "Isi pengalaman, pendidikan, atau background kamu terlebih dahulu."
+      );
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+    setCvData(null);
+>>>>>>> origin/develop
 
     try {
       const res = await fetch('/api/candidate/builder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rawText }),
+<<<<<<< HEAD
       })
       const data = await res.json()
 
@@ -89,12 +114,27 @@ export default function CandidateBuilderPage() {
       loadJobs()
     } catch (err) {
       setError('Terjadi kesalahan koneksi. Coba lagi.')
+=======
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Gagal membuat CV. Silakan coba lagi.");
+        return;
+      }
+
+      setCvData(data.cv);
+    } catch {
+      setError("Terjadi kesalahan koneksi. Silakan coba lagi.");
+>>>>>>> origin/develop
     } finally {
       setLoading(false)
     }
   }
 
   return (
+<<<<<<< HEAD
     <main style={{ maxWidth: 800, margin: '0 auto', padding: 32 }}>
       <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1B2A4A', marginBottom: 8 }}>
         ResumeForge AI — Buat CV Kamu
@@ -241,8 +281,33 @@ export default function CandidateBuilderPage() {
               </>
             )}
           </div>
+=======
+    <main className="min-h-[calc(100vh-68px)] bg-slate-50">
+      <CandidateHeader />
+
+      <section className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <CandidateForm
+              rawText={rawText}
+              setRawText={setRawText}
+              error={error}
+              loading={loading}
+              onGenerate={handleGenerate}
+            />
+          </div>
+
+          <CandidateSidebar />
+>>>>>>> origin/develop
         </div>
-      )}
+
+        {cvData && <CVPreview cvData={cvData} />}
+      </section>
     </main>
+<<<<<<< HEAD
   )
 }
+=======
+  );
+}
+>>>>>>> origin/develop

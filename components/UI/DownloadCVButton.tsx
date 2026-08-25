@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { CVDocument } from "./UI/CVDocument";
+import { CVDocument } from "./CVDocument";
 import type { CVData } from "@/lib/cv";
 
 // PDFDownloadLink harus di-load dynamic (client-only), karena

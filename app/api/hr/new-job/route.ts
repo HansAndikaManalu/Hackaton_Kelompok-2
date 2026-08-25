@@ -2,24 +2,33 @@ import { NextResponse } from 'next/server'
 import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 const scenarioSchema = z.object({
   scenarios: z.array(z.string()).length(3),
 })
 
-const SYSTEM_PROMPT = `Kamu adalah TalentPulse AI, asisten rekrutmen yang membantu HR memverifikasi klaim CV kandidat secara adil dan objektif. Tone: Efisien, Meyakinkan, Suportif — tidak menghakimi kandidat, fokus pada evaluasi kompetensi.
-
-TUGAS:
-Dari teks Job Description yang diberikan, buat 3 pertanyaan kasus situasional yang menguji kemampuan riil sesuai kualifikasi utama JD tersebut. Jika JD terlalu pendek/tidak lengkap, gunakan standar kualifikasi industri untuk posisi yang disebut.
-
-ATURAN:
-1. Pertanyaan harus berupa skenario kasus nyata (bukan pertanyaan teori/definisi), supaya bisa menguji kemampuan praktis.
-2. Setiap pertanyaan harus bisa dijawab dalam beberapa kalimat singkat (bukan esai panjang).
-3. Jangan bertanya hal yang bisa dijawab dengan mengarang tanpa bisa diverifikasi (misal "sebutkan pengalaman terbaikmu") — buat skenario spesifik yang butuh penalaran.`
+const SYSTEM_PROMPT = `Kamu adalah TalentPulse AI, asisten rekrutmen yang membantu HR memverifikasi klaim CV kandidat secara adil dan objektif. Tugasmu adalah membuat 3 pertanyaan skenario kasus nyata (case-based) yang relevan berdasarkan Job Description yang diberikan.`
 
 export async function POST(req: Request) {
   try {
+    // 1. Inisialisasi Supabase Client
+    const supabase = await createClient()
+
+    // 2. Cek Auth HR
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Silakan login terlebih dahulu.' },
+        { status: 401 }
+      )
+    }
+
+    // 3. Validasi Request Body
     const { jobTitle, jdText } = await req.json()
 
     if (!jdText || jdText.trim().length === 0) {
@@ -29,35 +38,41 @@ export async function POST(req: Request) {
       )
     }
 
+    // 4. Generate Skenario dari AI
     const { object } = await generateObject({
-      model: google('gemini-3.6-flash'),
+      model: google('gemini-1.5-flash'),
       schema: scenarioSchema,
       system: SYSTEM_PROMPT,
       prompt: `Job Title: ${jobTitle || '(tidak disebutkan)'}\n\nJob Description:\n${jdText}\n\nBuat 3 pertanyaan skenario kasus untuk memverifikasi kandidat yang melamar posisi ini.`,
     })
 
-    // simpan job + scenarios ke tabel job_vacancies
-    const { data: saved, error: dbError } = await supabaseAdmin
+    // 5. Simpan ke Database
+    const { data: newJob, error: dbError } = await supabase
       .from('job_vacancies')
       .insert({
-        title: jobTitle || 'Posisi Tanpa Judul',
+        title: jobTitle || 'Untitled Job',
         jd_text: jdText,
         scenarios: object.scenarios,
+        hr_id: user.id,
       })
-      .select('id')
+      .select()
       .single()
 
     if (dbError) {
+      console.error('Database Error:', dbError)
       return NextResponse.json({ error: dbError.message }, { status: 500 })
     }
 
     return NextResponse.json({
       success: true,
+      job: newJob,
       scenarios: object.scenarios,
-      job_id: saved.id,
+      job_id: newJob.id,
     })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    console.error('API Error:', error)
+    const message =
+      error instanceof Error ? error.message : 'Internal Server Error'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
