@@ -24,11 +24,11 @@ type DashboardData = {
   applications: CandidateApp[]
 }
 
-function scoreColor(score: number | null) {
-  if (score === null) return '#999'
-  if (score >= 70) return '#14B8A6' // teal - tinggi
-  if (score >= 40) return '#F59E0B' // amber - sedang
-  return '#999' // grey - rendah
+function scoreBadgeClass(score: number | null) {
+  if (score === null) return 'bg-slate-100 text-slate-500'
+  if (score >= 70) return 'bg-[#0F6E56]/10 text-[#0F6E56]'
+  if (score >= 40) return 'bg-amber-100 text-amber-700'
+  return 'bg-slate-100 text-slate-500'
 }
 
 function exportShortlistCSV(jobTitle: string, applications: CandidateApp[]) {
@@ -81,170 +81,150 @@ export default function HrDashboardPage() {
     if (jobId) load()
   }, [jobId])
 
-  if (loading) return <main style={{ padding: 32 }}>Memuat dashboard...</main>
-  if (error) return <main style={{ padding: 32, color: '#DC2626' }}>{error}</main>
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-7xl px-5 py-16 text-sm text-[#0B1F1B]/60 lg:px-8">
+        Memuat dashboard...
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-7xl px-5 py-16 text-sm text-red-600 lg:px-8">
+        {error}
+      </main>
+    )
+  }
+
   if (!data) return null
 
   return (
-    <main style={{ maxWidth: 900, margin: '0 auto', padding: 32 }}>
-      <div
-        style={{
-          backgroundColor: '#1B2A4A',
-          color: 'white',
-          padding: 20,
-          borderRadius: 8,
-          marginBottom: 24,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+    <main className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+      {/* Header */}
+      <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-[#0B1F1B] px-6 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700 }}>{data.job.title}</h1>
-          <p style={{ opacity: 0.8, fontSize: 14, marginTop: 4 }}>
+          <h1 className="text-xl font-bold">{data.job.title}</h1>
+          <p className="mt-1 text-sm text-white/60">
             {data.applications.length} kandidat melamar
           </p>
         </div>
         <button
           onClick={() => exportShortlistCSV(data.job.title, data.applications)}
           disabled={data.applications.length === 0}
-          style={{
-            backgroundColor: '#F59E0B',
-            color: '#1B2A4A',
-            fontWeight: 600,
-            padding: '10px 20px',
-            borderRadius: 6,
-            border: 'none',
-            cursor: data.applications.length === 0 ? 'not-allowed' : 'pointer',
-          }}
+          className="rounded-full bg-[#0F6E56] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B5443] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Export Shortlist
         </button>
       </div>
 
+      {/* Table */}
       {data.applications.length === 0 ? (
-        <p style={{ color: '#777' }}>Belum ada kandidat yang apply ke posisi ini.</p>
+        <div className="rounded-2xl border border-dashed border-[#0B1F1B]/15 px-6 py-16 text-center">
+          <p className="text-sm text-[#0B1F1B]/50">
+            Belum ada kandidat yang apply ke posisi ini.
+          </p>
+        </div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
-              <th style={{ padding: '10px 8px' }}>Nama</th>
-              <th style={{ padding: '10px 8px' }}>Match Score</th>
-              <th style={{ padding: '10px 8px' }}>Status</th>
-              <th style={{ padding: '10px 8px' }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.applications.map((app) => (
-              <tr key={app.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                <td style={{ padding: '10px 8px' }}>
-                  {app.candidate_profiles?.full_name ?? '(tanpa nama)'}
-                </td>
-                <td style={{ padding: '10px 8px' }}>
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      color: scoreColor(app.match_score),
-                    }}
-                  >
-                    {app.match_score !== null ? `${app.match_score}/100` : '—'}
-                  </span>
-                </td>
-                <td style={{ padding: '10px 8px', textTransform: 'capitalize' }}>
-                  {app.status}
-                </td>
-                <td style={{ padding: '10px 8px' }}>
-                  <button
-                    onClick={() => setSelected(app)}
-                    style={{
-                      backgroundColor: '#F4F5F7',
-                      border: '1px solid #ddd',
-                      borderRadius: 6,
-                      padding: '6px 14px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Detail
-                  </button>
-                </td>
+        <div className="overflow-hidden rounded-2xl border border-[#0B1F1B]/10">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-[#0B1F1B]/10 bg-[#0B1F1B]/[0.03] text-left text-xs font-semibold uppercase tracking-wide text-[#0B1F1B]/50">
+                <th className="px-4 py-3">Nama</th>
+                <th className="px-4 py-3">Match Score</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.applications.map((app) => (
+                <tr
+                  key={app.id}
+                  className="border-b border-[#0B1F1B]/5 last:border-0 hover:bg-[#0F6E56]/[0.03]"
+                >
+                  <td className="px-4 py-3 font-medium text-[#0B1F1B]">
+                    {app.candidate_profiles?.full_name ?? '(tanpa nama)'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${scoreBadgeClass(
+                        app.match_score
+                      )}`}
+                    >
+                      {app.match_score !== null ? `${app.match_score}/100` : '—'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 capitalize text-[#0B1F1B]/70">
+                    {app.status}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => setSelected(app)}
+                      className="rounded-full border border-[#0B1F1B]/15 px-4 py-1.5 text-xs font-semibold text-[#0B1F1B] transition hover:border-[#0F6E56]/40 hover:text-[#0F6E56]"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
+      {/* Detail drawer */}
       {selected && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: 420,
-            backgroundColor: 'white',
-            boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
-            padding: 24,
-            overflowY: 'auto',
-            color: '#1B2A4A',
-          }}
-        >
+        <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-white p-6 text-[#0B1F1B] shadow-2xl">
           <button
             onClick={() => setSelected(null)}
-            style={{
-              float: 'right',
-              border: 'none',
-              background: 'none',
-              fontSize: 20,
-              cursor: 'pointer',
-            }}
+            className="float-right text-xl leading-none text-[#0B1F1B]/40 hover:text-[#0B1F1B]"
+            aria-label="Tutup"
           >
             ×
           </button>
-          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
+
+          <h2 className="mb-1 text-lg font-bold">
             {selected.candidate_profiles?.full_name}
           </h2>
+
           <p
-            style={{
-              fontSize: 24,
-              fontWeight: 700,
-              color: scoreColor(selected.match_score),
-              marginBottom: 16,
-            }}
+            className={`mb-6 inline-block rounded-full px-3 py-1 text-lg font-bold ${scoreBadgeClass(
+              selected.match_score
+            )}`}
           >
-            {selected.match_score !== null ? `${selected.match_score}/100` : 'Belum dites'}
+            {selected.match_score !== null
+              ? `${selected.match_score}/100`
+              : 'Belum dites'}
           </p>
 
-          <h3 style={{ fontWeight: 700, marginBottom: 6 }}>Ringkasan CV</h3>
-          <p style={{ fontSize: 14, marginBottom: 16, lineHeight: 1.5 }}>
+          <h3 className="mb-1.5 text-sm font-bold text-[#0B1F1B]">
+            Ringkasan CV
+          </h3>
+          <p className="mb-6 text-sm leading-relaxed text-[#0B1F1B]/70">
             {selected.candidate_profiles?.cv_json?.summary}
           </p>
 
-          <h3 style={{ fontWeight: 700, marginBottom: 6 }}>Skills</h3>
-          <p style={{ fontSize: 14, marginBottom: 16 }}>
+          <h3 className="mb-1.5 text-sm font-bold text-[#0B1F1B]">Skills</h3>
+          <p className="mb-6 text-sm text-[#0B1F1B]/70">
             {selected.candidate_profiles?.cv_json?.skills?.join(', ')}
           </p>
 
           {selected.transcript && (
             <>
-              <h3 style={{ fontWeight: 700, marginBottom: 6 }}>Ringkasan AI untuk HR</h3>
-              <p
-                style={{
-                  fontSize: 14,
-                  marginBottom: 16,
-                  lineHeight: 1.5,
-                  backgroundColor: '#F4F5F7',
-                  padding: 12,
-                  borderRadius: 6,
-                }}
-              >
+              <h3 className="mb-1.5 text-sm font-bold text-[#0B1F1B]">
+                Ringkasan AI untuk HR
+              </h3>
+              <p className="mb-6 rounded-lg bg-[#0F6E56]/5 p-3 text-sm leading-relaxed text-[#0B1F1B]/80">
                 {selected.transcript.pitch_summary}
               </p>
 
-              <h3 style={{ fontWeight: 700, marginBottom: 6 }}>Transkrip Jawaban</h3>
+              <h3 className="mb-2 text-sm font-bold text-[#0B1F1B]">
+                Transkrip Jawaban
+              </h3>
               {selected.transcript.qa.map((qa, i) => (
-                <div key={i} style={{ marginBottom: 12, fontSize: 14 }}>
-                  <p style={{ fontWeight: 600 }}>{qa.question}</p>
-                  <p style={{ color: '#555' }}>{qa.answer}</p>
+                <div key={i} className="mb-3 text-sm">
+                  <p className="font-semibold text-[#0B1F1B]">{qa.question}</p>
+                  <p className="text-[#0B1F1B]/60">{qa.answer}</p>
                 </div>
               ))}
             </>

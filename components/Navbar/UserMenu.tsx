@@ -135,7 +135,7 @@ export default function UserMenu({
             {isHR ? (
               <>
                 <MenuItem
-                  href="/hr/dashboard"
+                  href="/hr/dashboard/"
                   icon={<UserRound size={17} />}
                   label="Dashboard"
                 />

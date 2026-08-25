@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import UserMenu from "./UserMenu";
 import { createClient } from "@/lib/supabase";
@@ -56,39 +57,46 @@ export async function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-5 lg:px-8">
         {/* LOGO */}
-        <Link
-          href="/"
-          className="shrink-0 text-xl font-bold tracking-tight text-blue-700"
-        >
-          TalentStream
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          <Image
+            src="/logo-heypulse.png"
+            alt="heypulse.id"
+            width={44}
+            height={44}
+            className="h-11 w-11 object-contain"
+            priority
+          />
+          <span className="text-xl font-bold tracking-tight text-teal-700">
+            heypulse.id
+          </span>
         </Link>
 
         {/* NAVIGATION */}
         <div className="hidden items-center gap-7 md:flex">
           <Link
             href="/jobs"
-            className="text-sm font-medium text-slate-600 transition hover:text-blue-700"
+            className="text-sm font-medium text-slate-600 transition hover:text-teal-700"
           >
             Lowongan
           </Link>
 
           <Link
             href="/companies"
-            className="text-sm font-medium text-slate-600 transition hover:text-blue-700"
+            className="text-sm font-medium text-slate-600 transition hover:text-teal-700"
           >
             Perusahaan
           </Link>
 
           <Link
             href="/salaries"
-            className="text-sm font-medium text-slate-600 transition hover:text-blue-700"
+            className="text-sm font-medium text-slate-600 transition hover:text-teal-700"
           >
             Gaji
           </Link>
 
           <Link
             href="/career"
-            className="text-sm font-medium text-slate-600 transition hover:text-blue-700"
+            className="text-sm font-medium text-slate-600 transition hover:text-teal-700"
           >
             Tips Karier
           </Link>
@@ -112,7 +120,7 @@ export async function Navbar() {
 
               <Link
                 href="/register"
-                className="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800"
+                className="rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
               >
                 Daftar
               </Link>
