@@ -102,3 +102,31 @@ export async function handleSignOut() {
 
   redirect('/login')
 }
+
+export async function activateSubscription() {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return { success: false, error: 'Silakan login terlebih dahulu.' }
+    }
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ is_subscribed: true })
+      .eq('id', user.id)
+
+    if (updateError) {
+      return { success: false, error: updateError.message }
+    }
+
+    return { success: true }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan'
+    return { success: false, error: message }
+  }
+}
