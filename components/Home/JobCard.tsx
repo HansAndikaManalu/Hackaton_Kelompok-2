@@ -29,7 +29,7 @@ export default function JobCard({ job }: JobCardProps) {
     : "Terbaru";
 
   return (
-    <article className="group rounded-xl border border-slate-200 bg-white p-5 transition hover:border-blue-200 hover:shadow-sm">
+    <article className="group rounded-xl border border-slate-200 bg-white p-5 transition hover:border-teal-200 hover:shadow-sm">
       <div className="flex gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-sm font-bold text-slate-600">
           {initial}
@@ -40,7 +40,7 @@ export default function JobCard({ job }: JobCardProps) {
             <div>
               <Link
                 href={`/jobs/${job.id}`}
-                className="text-base font-semibold text-slate-900 group-hover:text-blue-700"
+                className="text-base font-semibold text-slate-900 group-hover:text-teal-700"
               >
                 {job.title}
               </Link>
@@ -50,7 +50,7 @@ export default function JobCard({ job }: JobCardProps) {
               </p>
             </div>
 
-            <button className="shrink-0 text-slate-400 hover:text-blue-700">
+            <button className="shrink-0 text-slate-400 hover:text-teal-700">
               <Bookmark size={19} />
             </button>
           </div>
@@ -75,7 +75,7 @@ export default function JobCard({ job }: JobCardProps) {
 
             <Link
               href={`/jobs/${job.id}`}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition"
+              className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 transition"
             >
               Lamar <Send size={12} />
             </Link>

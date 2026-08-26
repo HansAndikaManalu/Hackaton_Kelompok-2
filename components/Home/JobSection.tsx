@@ -43,7 +43,7 @@ export default function JobSection() {
           </p>
         </div>
 
-        <button className="hidden items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800 sm:flex">
+        <button className="hidden items-center gap-2 text-sm font-semibold text-teal-700 hover:text-teal-800 sm:flex">
           Lihat semua
           <ArrowRight size={16} />
         </button>

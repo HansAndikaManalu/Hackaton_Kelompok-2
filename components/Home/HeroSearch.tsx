@@ -48,7 +48,7 @@ export default function HeroSearch() {
               />
             </div>
 
-            <button className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-7 py-3 text-sm font-semibold text-white hover:bg-blue-800 md:mt-0">
+            <button className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-7 py-3 text-sm font-semibold text-white hover:bg-teal-700 md:mt-0">
               <Search size={18} />
               Cari
             </button>
