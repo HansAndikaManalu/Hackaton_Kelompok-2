@@ -30,7 +30,7 @@ export default function LoginPage() {
       if (res.role === "hr") {
         router.push("/hr/dashboard");
       } else {
-        router.push("/pelamar");
+        router.push("/candidate");
       }
     } else {
       setError(res.error || "Gagal masuk");
