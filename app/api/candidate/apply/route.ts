@@ -3,6 +3,7 @@ import { createClient, supabaseAdmin } from '@/lib/supabase'
 import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
 import { cvSchema } from '@/lib/cv'
+import { sendNewApplicationEmail } from '@/lib/email'
 // @ts-expect-error - pdf-parse tidak punya tipe resmi yang cocok dengan ESM import
 import pdf from 'pdf-parse/lib/pdf-parse.js'
 
@@ -127,6 +128,33 @@ export async function POST(req: Request) {
       if (appError) {
         console.error('Applications Insert Error:', appError)
         return NextResponse.json({ error: appError.message }, { status: 500 })
+      }
+
+      // 6. Kirim notifikasi email ke HR pemilik lowongan
+      try {
+        const { data: job } = await supabaseAdmin
+          .from('job_vacancies')
+          .select('title, hr_id')
+          .eq('id', jobId)
+          .single()
+
+        if (job?.hr_id) {
+          const { data: hrProfile } = await supabaseAdmin
+            .from('profiles')
+            .select('email')
+            .eq('id', job.hr_id)
+            .single()
+
+          if (hrProfile?.email) {
+            await sendNewApplicationEmail({
+              hrEmail: hrProfile.email,
+              jobTitle: job.title,
+              candidateName: fullName,
+            })
+          }
+        }
+      } catch (notifErr) {
+        console.error('Gagal kirim notifikasi HR (non-fatal):', notifErr)
       }
     }
 
