@@ -105,7 +105,7 @@ export default function InterviewPage({
       }
 
       alert('Selamat! Jawaban kuis & CV kamu berhasil dikirim.')
-      router.push('/')
+      router.push('/pelamar')
     } catch {
       alert('Terjadi kesalahan koneksi saat mengirim jawaban.')
       setSubmitting(false)
