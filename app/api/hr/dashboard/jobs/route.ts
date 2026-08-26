@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createClient, supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
   try {
@@ -19,7 +19,8 @@ export async function GET() {
     }
 
     // 2. Ambil daftar lowongan milik HR tersebut + Hitung jumlah pelamarnya
-    const { data: jobs, error: dbError } = await supabase
+    //    Pakai supabaseAdmin supaya count applications tidak terblokir RLS
+    const { data: jobs, error: dbError } = await supabaseAdmin
       .from('job_vacancies')
       .select(`
         id,
